@@ -1,0 +1,3 @@
+python_telegram_bot==20.0a4
+vk_api==11.9.9
+vkbottle==4.3.10
