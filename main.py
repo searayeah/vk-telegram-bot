@@ -1,28 +1,26 @@
-# from re import X
-from vkbottle import UserPolling
-
-# from vk_api.longpoll import VkLongPoll, VkEventType
 import asyncio
-from vkbottle import API
-from vkbottle.user import User
 import telegram
-from vk_api.longpoll import Event, VkEventType
-from telegram import ForceReply, Update
-from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler
-
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
+from telegram import (
+    ForceReply,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    ReplyKeyboardMarkup,
+    ReplyKeyboardRemove,
+    Update,
+)
 from telegram.ext import (
     Application,
+    CallbackQueryHandler,
     CommandHandler,
     ContextTypes,
     ConversationHandler,
     MessageHandler,
     filters,
 )
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ContextTypes
+from vk_api.longpoll import Event, VkEventType
 from vk_api.utils import get_random_id
-
+from vkbottle import API, UserPolling
+from vkbottle.user import User
 
 CURRENT_STATE = {
     "type": 0,  # 0 - no active chat, 1 - from_user # 2 - from_group, 3 - from_chat
@@ -30,7 +28,6 @@ CURRENT_STATE = {
     "name": "",
     "chat_name": "",
 }
-
 
 
 async def run_polling(polling, bot):
