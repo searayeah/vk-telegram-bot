@@ -191,7 +191,7 @@ class MessageProcessor:
             return f"\n{future_text}" if future_text != "" else ""
         else:
             name = await self.get_name(
-                "user" if vk_message.from_id > 0 else "group", vk_message.from_id
+                "user" if vk_message.from_id > 0 else "group", abs(vk_message.from_id)
             )
             reply_message = await self.get_reply_message(vk_message, level)
             return f"{'    '*level}{name} : {self.fix_text(vk_message.text)}{reply_message}\n{future_text}"
@@ -211,8 +211,8 @@ class MessageProcessor:
 
     async def process(self, event):
         await self.set(event)
-        print(self.__dict__)
         await self.send_msg()
+        print(self.__dict__)
 
 
 async def run_polling(context):
