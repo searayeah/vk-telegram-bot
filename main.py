@@ -1,5 +1,6 @@
+# 4096 UTF8 characters
 import asyncio
-from email.mime import application
+from re import A
 import telegram
 from telegram import (
     ForceReply,
@@ -25,177 +26,206 @@ from vkbottle.user import User
 from vkbottle_types.objects import MessagesConversationPeerType
 from keyboards import set_keyboard_1, set_keyboard_8
 import logging
-
+from itertools import compress
+import os
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
+
+TG_CHAT_ID = os.environ["TG_CHAT_ID"]
+VK_TOKEN = os.environ["VK_TOKEN"]
+TG_TOKEN = os.environ["TG_TOKEN"]
+
+
 
 
 POLLING = UserPolling(api=API(VK_TOKEN))
 
-CHAT_STATE = {
-    "type": None,
-    "id": None,
-    "name": None,
-}
-TRAILING_STATE = {
-    "active": False,  # after my message False
-    "name": None,
-    "message_id": None,
-    "sender_id": None,
-    "text": None,
-}
-PINNED_MSG_ID = None
+shitty_chars = [
+    "_",
+    "*",
+    "[",
+    "]",
+    "(",
+    ")",
+    "~",
+    "`",
+    ">",
+    "#",
+    "+",
+    "-",
+    "=",
+    "|",
+    "{",
+    "}",
+    ".",
+    "!",
+]
 
 
-async def process_user(bot, event):
-    response = {"chat_id": TG_CHAT_ID}
-    logger.info(f"From user {event.user_id}")
-    trailing_state = (
-        TRAILING_STATE["active"] and TRAILING_STATE["sender_id"] == event.user_id
-    )
-    if trailing_state:
-        logger.info(f"Trailing active")
-        response[
-            "text"
-        ] = f"{TRAILING_STATE['name']}: {TRAILING_STATE['text']}\n{event.text}"
-        response["message_id"] = TRAILING_STATE["message_id"]
-        TRAILING_STATE["text"] = f"{TRAILING_STATE['text']}\n{event.text}"
-    else:
-        logger.info(f"Trailing inactive")
-        user_info = await POLLING.api.users.get(event.user_id)
+class MessageProcessor:
+    def __init__(self, bot):
+        self.bot = bot
 
-        TRAILING_STATE["name"] = f"*{user_info[0].first_name} {user_info[0].last_name}*"
-        TRAILING_STATE["sender_id"] = event.user_id
-        TRAILING_STATE["text"] = event.text
-        response["text"] = f"{TRAILING_STATE['name']}: {event.text}"
+        self.message_types = ["user", "group", "chat"]
+        self.parse_mode = "MarkdownV2"
 
-    if CHAT_STATE["id"] != event.user_id:
-        logger.info(f"Keyboard set")
-        callback_data = f"user.{event.user_id}.{TRAILING_STATE['name']}"
-        response["reply_markup"] = set_keyboard_1("Answer", callback_data)
+        self.trailing = None
+        self.message_id = None
+        self.id = None
+        self.message_text = None
+        self.name = None
+        self.peer_id = None
+        self.chat_active = None
+        self.callback_data = None
+        self.reply_markup = None
 
-    if trailing_state:
-        logger.info(f"Message edit")
-        await bot.edit_message_text(**response, parse_mode="MarkdownV2")
-    else:
-        logger.info(f"Message sent")
-        message = await bot.send_message(**response, parse_mode="MarkdownV2")
-        TRAILING_STATE["message_id"] = message.message_id
-        TRAILING_STATE["active"] = True
-    logger.info(f"TRAILING {TRAILING_STATE}\nRESPONSE {response}")
+        # talking to currently
+        self.answer_type = None
+        self.answer_id = None
+        self.answer_name = None
 
-
-async def process_group(bot, event):
-    response = {"chat_id": TG_CHAT_ID}
-    logger.info(f"From group {event.group_id}")
-    trailing_state = (
-        TRAILING_STATE["active"] and TRAILING_STATE["sender_id"] == event.group_id
-    )
-    if trailing_state:
-        logger.info(f"Trailing active")
-        response[
-            "text"
-        ] = f"{TRAILING_STATE['name']}: {TRAILING_STATE['text']}\n{event.text}"
-        response["message_id"] = TRAILING_STATE["message_id"]
-        TRAILING_STATE["text"] = f"{TRAILING_STATE['text']}\n{event.text}"
-    else:
-        logger.info(f"Trailing inactive")
-        group_info = await POLLING.api.groups.get_by_id(event.group_id)
-
-        TRAILING_STATE["name"] = f"*{group_info[0].name}*"
-        TRAILING_STATE["sender_id"] = event.group_id
-        TRAILING_STATE["text"] = event.text
-        response["text"] = f"{TRAILING_STATE['name']}: {event.text}"
-
-    if CHAT_STATE["id"] != event.group_id:
-        logger.info(f"Keyboard set")
-        callback_data = f"group.{event.group_id}.{TRAILING_STATE['name']}"
-        response["reply_markup"] = set_keyboard_1("Answer", callback_data)
-
-    if trailing_state:
-        logger.info(f"Message edit")
-        await bot.edit_message_text(**response, parse_mode="MarkdownV2")
-    else:
-        logger.info(f"Message sent")
-        message = await bot.send_message(**response, parse_mode="MarkdownV2")
-        TRAILING_STATE["message_id"] = message.message_id
-        TRAILING_STATE["active"] = True
-    logger.info(f"TRAILING {TRAILING_STATE}\nRESPONSE {response}")
-
-
-async def process_chat(bot, event):
-    response = {"chat_id": TG_CHAT_ID}
-    logger.info(f"From chat {event.chat_id}")
-    trailing_state = (
-        TRAILING_STATE["active"] and TRAILING_STATE["sender_id"] == event.chat_id
-    )
-
-    user_info = await POLLING.api.users.get(event.user_id)
-
-    if trailing_state:
-        logger.info(f"Trailing active")
-
-        response["text"] = (
-            f"{TRAILING_STATE['name']}\n{TRAILING_STATE['text']}\n"
-            + f"{user_info[0].first_name} {user_info[0].last_name}: {event.text}"
+    async def set(self, event):
+        # кейс когда идет реплай на группу пересланных сообщений
+        self.vk_message_id = event.message_id
+        self.vk_message = (
+            await POLLING.api.messages.get_by_id(self.vk_message_id)
+        ).items[0]
+        self.reply_text = await self.get_reply_message(self.vk_message)
+        self.forwarded_messages = await self.get_fwd_messages(self.vk_message)
+        self.peer_id = event.peer_id
+        self.message_type, self.id, self.trailing = self.get_event_info(event)
+        self.name = (
+            self.name
+            if self.trailing
+            else await self.get_name(self.message_type, self.id)
         )
-        response["message_id"] = TRAILING_STATE["message_id"]
-        TRAILING_STATE["text"] = (
-            f"{TRAILING_STATE['text']}\n"
-            + f"{user_info[0].first_name} {user_info[0].last_name}: {event.text}"
-        )
-    else:
-        logger.info(f"Trailing inactive")
-        chat_info = await POLLING.api.messages.get_conversations_by_id(
-            2000000000 + event.chat_id
+        self.message_id = self.message_id if self.trailing else None
+
+        self.chat_user = (
+            f"*{await self.get_name('user', event.user_id)}: *"
+            if self.message_type == "chat"
+            else ""
         )
 
-        TRAILING_STATE["name"] = f"*{chat_info.items[0].chat_settings.title}*"
-        TRAILING_STATE["sender_id"] = event.chat_id
-        TRAILING_STATE[
-            "text"
-        ] = f"{user_info[0].first_name} {user_info[0].last_name}: {event.text}"
-        response["text"] = (
-            f"{TRAILING_STATE['name']}\n"
-            + f"{user_info[0].first_name} {user_info[0].last_name}: {event.text}"
+        self.message_text = (
+            f"{self.message_text}\n{self.chat_user}{self.fix_text(event.text)}{self.reply_text}{self.forwarded_messages}"
+            if self.trailing
+            else f"{self.chat_user}{self.fix_text(event.text)}{self.reply_text}{self.forwarded_messages}"  # иногда сюда заходит почему то
         )
 
-    if CHAT_STATE["id"] != 2000000000 + event.chat_id:
-        logger.info(f"Keyboard set")
-        callback_data = f"chat.{2000000000 + event.chat_id}.{TRAILING_STATE['name']}"
-        response["reply_markup"] = set_keyboard_1("Answer", callback_data)
+        self.answer = (
+            f"_{self.name}_\n{self.message_text}"
+            if self.message_type == "chat"
+            else f"*{self.name}*: {self.message_text}"
+        )
 
-    if trailing_state:
-        logger.info(f"Message edit")
-        await bot.edit_message_text(**response, parse_mode="MarkdownV2")
-    else:
-        logger.info(f"Message sent")
-        message = await bot.send_message(**response, parse_mode="MarkdownV2")
-        TRAILING_STATE["message_id"] = message.message_id
-        TRAILING_STATE["active"] = True
-    logger.info(f"TRAILING {TRAILING_STATE}\nRESPONSE {response}")
+        self.chat_active = self.answer_id == self.peer_id
+        self.callback_data = f"{self.message_type}.{self.peer_id}.{self.name}"
+        self.reply_markup = (
+            set_keyboard_1("Answer", self.callback_data)
+            if not self.chat_active
+            else None
+        )
 
+    async def get_name(self, message_type, id):
+        if message_type == "group":
+            group_info = await POLLING.api.groups.get_by_id(id)
+            return self.fix_text(group_info[0].name)
+        elif message_type == "user":
+            user_info = await POLLING.api.users.get(id)
+            return self.fix_text(f"{user_info[0].first_name} {user_info[0].last_name}")
+        elif message_type == "chat":
+            chat_info = await POLLING.api.messages.get_conversations_by_id(
+                int(2e9) + id
+            )
+            return self.fix_text(chat_info.items[0].chat_settings.title)
 
-async def process_update(bot, event):
-    if event.type == VkEventType.MESSAGE_NEW and event.to_me:  # for testing purposes
-        logger.info(f"Entered new message")
+    def get_event_info(self, event):
         if event.from_user:
-            await process_user(bot, event)
+            return "user", event.user_id, self.trailing and self.id == event.user_id
         elif event.from_group:
-            await process_group(bot, event)
+            return "group", event.group_id, self.trailing and self.id == event.group_id
         elif event.from_chat:
-            await process_chat(bot, event)
+            return "chat", event.chat_id, self.trailing and self.id == event.chat_id
+
+    async def send_msg(self):
+        if self.trailing:
+            await self.bot.edit_message_text(
+                text=self.answer,
+                chat_id=TG_CHAT_ID,
+                message_id=self.message_id,
+                parse_mode=self.parse_mode,
+                reply_markup=self.reply_markup,
+            )
+        else:
+            message = await self.bot.send_message(
+                text=self.answer,
+                chat_id=TG_CHAT_ID,
+                parse_mode=self.parse_mode,
+                reply_markup=self.reply_markup,
+            )
+            self.message_id = message.message_id
+            self.trailing = True
+
+    async def get_reply_message(self, message, level=0):
+        if message.reply_message:
+            name = await self.get_name(
+                "user" if message.reply_message.from_id > 0 else "group",
+                abs(message.reply_message.from_id),
+            )
+            return f"\n{'    '*level}_В ответ на:_\n{'    '*(level+1)}{name}: {self.fix_text(message.reply_message.text)}"
+        else:
+            return ""
+
+    ## какая то хуйня нейминг надо исправить
+    async def get_fwd_messages(self, vk_message, level=0, skip_first=True):
+        future_text = ""
+        if vk_message.fwd_messages:
+            future_text += f"{'    '*level}_Пересланные сообщения_\n"
+            for message in vk_message.fwd_messages:
+                future_text += await self.get_fwd_messages(message, level + 1)
+        if skip_first and level == 0:
+            return f"\n{future_text}" if future_text != "" else ""
+        else:
+            name = await self.get_name(
+                "user" if vk_message.from_id > 0 else "group", vk_message.from_id
+            )
+            reply_message = await self.get_reply_message(vk_message, level)
+            return f"{'    '*level}{name} : {self.fix_text(vk_message.text)}{reply_message}\n{future_text}"
+
+    def fix_text(self, text):
+        if len(text) == 0:
+            return "Нет текста сообщения"  # а если фотография???))
+        text = (
+            text.replace("&lt;", "<")
+            .replace("&gt;", ">")
+            .replace("&quot;", '"')
+            .replace("&amp;", "&")
+        )
+        for char in shitty_chars:
+            text = text.replace(char, f"\\{char}")
+        return text
+
+    async def process(self, event):
+        await self.set(event)
+        print(self.__dict__)
+        await self.send_msg()
 
 
-async def run_polling(bot):
+async def run_polling(context):
     async for event in POLLING.listen():
         for update in event.get("updates", []):
             event = Event(update)  # IMPORTANT change vkbottle longpoll version to 3
             # vk_api Event class works only with ver 3 longpoll
             # while vkbottle uses default version 0
-            await process_update(bot, event)
+            if (
+                event.type == VkEventType.MESSAGE_NEW
+            ):  # and event.to_me:  # for testing purposes
+                logger.info(f"Entered new message")
+                await context["message_processor"].process(event)
 
 
 async def answer_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -203,34 +233,33 @@ async def answer_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     await query.answer()
 
     callback_data = query.data.split(".")
-    CHAT_STATE["type"] = callback_data[0]
-    CHAT_STATE["id"] = int(callback_data[1])
-    CHAT_STATE["name"] = callback_data[2]
 
-    output = f"Now talking with {CHAT_STATE['name']}"
+    context.bot_data["message_processor"].answer_type = callback_data[0]
+    context.bot_data["message_processor"].answer_id = int(callback_data[1])
+    context.bot_data["message_processor"].answer_name = callback_data[2]
+
+    output = f"Now talking with {context.bot_data['message_processor'].answer_name}"
     message = await query.message.reply_text(text=output)
     await message.pin()
-    TRAILING_STATE["active"] = False
+    context.bot_data["message_processor"].trailing = False
 
 
 async def send_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if CHAT_STATE["type"] != None:
+    if context.bot_data["message_processor"].answer_type != None:
         await POLLING.api.messages.send(
-            peer_id=CHAT_STATE["id"]
-            if CHAT_STATE["type"] in ("user", "chat")
-            else -CHAT_STATE["id"],
+            peer_id=context.bot_data["message_processor"].answer_id,
             random_id=get_random_id(),
             message=update.message.text,
         )
     else:
         await update.message.reply_text(text="No chat selected")
-    TRAILING_STATE["active"] = False
+    context.bot_data["message_processor"].trailing = False
 
 
 async def now(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    output = f"Now talking with {CHAT_STATE['name']}"
+    output = f"Now talking with {context.bot_data['message_processor'].answer_name}"
     await update.message.reply_text(text=output)
-    TRAILING_STATE["active"] = False
+    context.bot_data["message_processor"].trailing = False
 
 
 async def chats(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -296,12 +325,18 @@ async def main():
         MessageHandler(filters.TEXT & ~filters.COMMAND, send_message)
     )
 
+    application.bot_data["message_processor"] = MessageProcessor(application.bot)
+    # application.bot_data["answer_type"] = None
+    # application.bot_data["answer_id"] = None
+    # application.bot_data["answer_name"] = None
+
     async with application:
 
         await application.updater.start_polling()
         await application.start()
 
-        await run_polling(bot=application.bot)
+        # await test()
+        await run_polling(context=application.bot_data)
 
         # run until it receives a stop signal
         await application.updater.stop()
