@@ -51,8 +51,8 @@ async def run_polling(context):
             # vk_api Event class works only with ver 3 longpoll
             # while vkbottle uses default version 0
             if (
-                event.type == VkEventType.MESSAGE_NEW
-            ):  # and event.to_me:  # for testing purposes
+                event.type == VkEventType.MESSAGE_NEW and event.to_me
+            ):  # for testing purposes
                 logger.info(f"Entered new message")
                 await context["message_processor"].process(event)
 
@@ -75,9 +75,9 @@ async def answer_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
 
 async def send_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if context.bot_data["message_processor"].answer_id != None:
+    if context.bot_data["message_processor"].active_conversation_id != None:
         await POLLING.api.messages.send(
-            peer_id=context.bot_data["message_processor"].answer_id,
+            peer_id=context.bot_data["message_processor"].active_conversation_id,
             random_id=get_random_id(),
             message=update.message.text,
         )

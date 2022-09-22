@@ -63,6 +63,7 @@ class MessageProcessor:
         # fix text for \n and stuff
         # if youtube video is sent
         # if attachments number is more than one
+        # скинули новость
 
         self.vk_message = (
             await self.vk_polling.api.messages.get_by_id(event.message_id)
