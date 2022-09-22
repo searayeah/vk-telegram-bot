@@ -73,7 +73,7 @@ def set_keyboard_row_3(
     )
 
 
-def set_keyboard_list_3(
+def set_keyboard_column_3(
     x,
     y,
     z,
