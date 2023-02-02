@@ -3,10 +3,11 @@ from telegram.ext import CommandHandler
 
 
 async def current(update, context):
-    # TO-DO
-    # if answer_name == none
-    text = f"Now talking with {state.active_conversation_name}"
-    await update.message.reply_text(text=text, parse_mode=state.parse_mode)
+    if state.active_conversation_name:
+        text = f"Now talking with {state.active_conversation_name}"
+    else:
+        text = f"No chat selected"
+        await update.message.reply_text(text=text, parse_mode=state.parse_mode)
     state.trailing = False
 
 

@@ -2,6 +2,10 @@ from telegram.ext import ApplicationBuilder
 from dotenv import load_dotenv
 from vkbottle import API, UserPolling
 from os import environ
+import logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 load_dotenv()
