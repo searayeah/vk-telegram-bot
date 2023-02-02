@@ -23,7 +23,7 @@ async def process(event):
     vk_message = await vk.get_message(event.message_id)
     state.trailing = state.trailing and state.peer_id_previous == vk_message.peer_id
 
-    attachments = await vk.get_attachments(vk_message)
+    attachments = await vk.get_attachments(vk_message) # to-do
 
     if not state.trailing:
         state.conversation_name = f"_{await vk.get_name(vk_message.peer_id)}_"
