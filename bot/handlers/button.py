@@ -1,18 +1,22 @@
+from bot import application
+from telegram.ext import CallbackQueryHandler
+from bot import state
 
 
-
-async def answer_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def answer_button(update, context):
     query = update.callback_query
     await query.answer()
 
-    # callback_data = query.data.split(".")
+    callback_data = query.data.split(".")
 
-    # context.bot_data["message_processor"].active_conversation_id = int(callback_data[0])
-    # context.bot_data["message_processor"].active_conversation_name = callback_data[1]
+    state.active_conversation_id = int(callback_data[0])
+    state.active_conversation_name = callback_data[1]
 
-    # output = f"Now talking with {context.bot_data['message_processor'].active_conversation_name}"
-    # message = await query.message.reply_text(
-    #     text=output, parse_mode=context.bot_data["message_processor"].parse_mode
-    # )
-    # await message.pin()
-    # context.bot_data["message_processor"].trailing = False
+    text = f"Now talking with {state.active_conversation_name}"
+    message = await query.message.reply_text(text=text, parse_mode=state.parse_mode)
+    await message.pin()
+
+    state.trailing = False
+
+
+application.add_handler(CallbackQueryHandler(answer_button))

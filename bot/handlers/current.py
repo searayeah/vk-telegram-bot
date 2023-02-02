@@ -1,13 +1,13 @@
-from bot import application
+from bot import application, state
 from telegram.ext import CommandHandler
 
 
-async def now(update, context):
+async def current(update, context):
     # TO-DO
     # if answer_name == none
-    # await update.message.reply_text(**context.bot_data["message_processor"].now())
+    text = f"Now talking with {state.active_conversation_name}"
+    await update.message.reply_text(text=text, parse_mode=state.parse_mode)
+    state.trailing = False
 
-    await update.message.reply_text("now")
 
-
-application.add_handler(CommandHandler("now", now))
+application.add_handler(CommandHandler("current", current))
