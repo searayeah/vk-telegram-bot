@@ -1,5 +1,6 @@
 from bot import application, state
-from telegram.ext import CommandHandler
+from telegram.ext import CommandHandler, filters
+from bot import TG_CHAT_ID
 
 
 async def current(update, context):
@@ -11,4 +12,4 @@ async def current(update, context):
     state.trailing = False
 
 
-application.add_handler(CommandHandler("current", current))
+application.add_handler(CommandHandler("current", current, filters=filters.User(int(TG_CHAT_ID))))

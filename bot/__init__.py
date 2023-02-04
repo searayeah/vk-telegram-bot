@@ -10,7 +10,7 @@ logger.setLevel(logging.INFO)
 
 load_dotenv()
 
-TG_CHAT_ID = environ["TG_CHAT_ID"]
+TG_CHAT_ID = int(environ["TG_CHAT_ID"])
 VK_TOKEN = environ["VK_TOKEN"]
 TG_TOKEN = environ["TG_TOKEN"]
 

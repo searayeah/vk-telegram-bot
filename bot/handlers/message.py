@@ -1,6 +1,6 @@
 from bot import application
 from telegram.ext import MessageHandler, filters
-from bot import state
+from bot import state, TG_CHAT_ID
 from bot.processors import vk
 
 
@@ -14,4 +14,4 @@ async def message(update, context):
         await update.message.reply_text(text=text, parse_mode=state.parse_mode)
     state.trailing = False
 
-application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message))
+application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & filters.User(TG_CHAT_ID), message))
