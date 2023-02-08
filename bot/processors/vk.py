@@ -4,13 +4,14 @@ from vkbottle import API, UserPolling
 from vkbottle.user import User
 from vkbottle_types.objects import MessagesConversationPeerType
 from bot import polling
+from telegram import InputMediaPhoto
 
 # from bot.processors.messageprocessor import process
 from bot.misc.utils import get_message_type, fix_text, set_tab
 
 
-async def get_attachments(message_id):
-    pass
+async def get_attachments(message):
+    return [attachment.photo.sizes[-1].url for attachment in message.attachments]
 
 
 async def send_message(peer_id, text):

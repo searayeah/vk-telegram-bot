@@ -18,7 +18,6 @@ TG_TOKEN = environ["TG_TOKEN"]
 class State:
     parse_mode = "MarkdownV2"
 
-
     conversation_name = None
 
     trailing = None
@@ -31,26 +30,6 @@ class State:
 
 
 # self.message_types = ["user", "group", "chat"]
-
-# self.vk_message = None
-# self.attachments = None
-# self.conversation_name = None
-
-# self.message_text = None
-# self.answer = None
-
-# self.conversation_active = None
-# self.callback_data = None
-# self.reply_markup = None
-
-# # trailing stuff
-# self.trailing = None
-# self.tg_message_id = None
-# self.peer_id_previous = None
-
-# # talking to currently
-# self.active_conversation_id = None
-# self.active_conversation_name = None
 
 
 state = State()

@@ -23,7 +23,10 @@ async def process(event):
     vk_message = await vk.get_message(event.message_id)
     state.trailing = state.trailing and state.peer_id_previous == vk_message.peer_id
 
-    attachments = await vk.get_attachments(vk_message) # to-do
+    attachments = await vk.get_attachments(vk_message)  # to-do
+    if attachments:
+        await tg.send_photos(TG_CHAT_ID, attachments, "test", state.parse_mode)
+    return
 
     if not state.trailing:
         state.conversation_name = f"_{await vk.get_name(vk_message.peer_id)}_"
@@ -40,12 +43,23 @@ async def process(event):
 
     if state.trailing:
         await tg.edit_message(
-            state.tg_message_text, TG_CHAT_ID, state.tg_message_id, state.parse_mode, reply_markup
+            state.tg_message_text,
+            TG_CHAT_ID,
+            state.tg_message_id,
+            state.parse_mode,
+            reply_markup,
         )
     else:
-        tg_message_id = await tg.send_message(
-            state.tg_message_text, TG_CHAT_ID, state.parse_mode, reply_markup
-        )
+        if len(attachments) == 1:
+            print("test", attachments[0])
+            tg_message_id = await tg.send_photo(
+                state.tg_message_text, attachments[0], TG_CHAT_ID, state.parse_mode
+            )
+        else:
+            tg_message_id = await tg.send_message(
+                state.tg_message_text, TG_CHAT_ID, state.parse_mode, reply_markup
+            )
+
         state.tg_message_id = tg_message_id
         state.peer_id_previous = vk_message.peer_id
         state.trailing = True
