@@ -1,7 +1,7 @@
 import asyncio
 from bot import application
 from .processors.polling import start_polling
-from .handlers import message, current, button
+from .handlers import message, current, button, chats
 
 
 async def main():

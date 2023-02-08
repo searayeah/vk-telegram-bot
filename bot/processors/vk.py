@@ -78,3 +78,11 @@ def send_attach():
 
 def send_vid():
     pass
+
+
+async def get_chats():
+    chats = await polling.api.messages.get_conversations(
+        count=1, extended=True, offset=0
+    )
+    print(chats)
+    # chats.profiles

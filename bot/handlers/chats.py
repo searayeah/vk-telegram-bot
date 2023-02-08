@@ -1,7 +1,21 @@
-from bot import application
-from telegram.ext import CommandHandler
+from bot import application, TG_CHAT_ID
+from telegram.ext import CommandHandler, filters
+from vkbottle_types.objects import MessagesConversationPeerType
+from bot.processors import vk
+
 
 async def chats(update, context):
+    # move to vk.py
+    # asyncio gather
+    # fix text
+    output = []
+    chats = await vk.get_chats()
+    # unread_count = chats.unread_count
+    # for item in chats.items:
+    #     if item.conversation.peer.type == MessagesConversationPeerType.CHAT:
+    #         output.append(f"Беседа {item.conversation.chat_settings.title}")
+    #     elif item.conversation.peer.type == MessagesConversationPeerType.USER:
+    #         output.append(f"{user_info[0].first_name} " + f"{user_info[0].last_name}")
     await update.message.reply_text("chats")
     ## need review
     # chats = await POLLING.api.messages.get_conversations(count=10)
@@ -52,4 +66,7 @@ async def chats(update, context):
     # print(chats)
     # TRAILING_STATE["active"] = False
 
-application.add_handler(CommandHandler("now", chats))
+
+application.add_handler(
+    CommandHandler("chats", chats, filters=filters.User(TG_CHAT_ID))
+)
