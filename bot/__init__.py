@@ -15,6 +15,14 @@ VK_TOKEN = environ["VK_TOKEN"]
 TG_TOKEN = environ["TG_TOKEN"]
 
 
+CALLBACK_ANSWER = "answer"
+CALLBACK_CHATS = ""
+
+CHATS_NEXT = "next"
+CHATS_PREV = "prev"
+
+
+
 class State:
     parse_mode = "MarkdownV2"
 

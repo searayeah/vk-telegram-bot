@@ -4,6 +4,7 @@ from vkbottle import API, UserPolling
 from vkbottle.user import User
 from vkbottle_types.objects import MessagesConversationPeerType
 from bot import polling
+from bot import CALLBACK_ANSWER
 
 # from bot.processors.messageprocessor import process
 from bot.misc.utils import get_message_type, fix_text, set_tab
@@ -80,9 +81,26 @@ def send_vid():
     pass
 
 
-async def get_chats():
+async def get_chats(count, offset):
     chats = await polling.api.messages.get_conversations(
-        count=1, extended=True, offset=0
+        count=count, extended=True, offset=offset
     )
-    print(chats)
-    # chats.profiles
+    data = {}
+    for item in chats.items:
+        if item.conversation.peer.type == MessagesConversationPeerType.USER:
+            for profile in chats.profiles:
+                if profile.id == item.conversation.peer.id:
+                    name = f"{profile.first_name} {profile.last_name}"
+                    break
+        elif item.conversation.peer.type == MessagesConversationPeerType.GROUP:
+            for group in chats.groups:
+                if group.id == abs(item.conversation.peer.id):
+                    name = group.name
+                    break
+        elif item.conversation.peer.type == MessagesConversationPeerType.CHAT:
+            name = item.conversation.chat_settings.title
+        data[item.conversation.peer.id] = fix_text(name)
+        if item.conversation.unread_count:
+            data[item.conversation.peer.id] += item.conversation.unread_count
+    unread_count = chats.unread_count if chats.unread_count else 0
+    return unread_count, data

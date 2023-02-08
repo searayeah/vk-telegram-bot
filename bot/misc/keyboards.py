@@ -13,32 +13,24 @@ def set_keyboard_8(
     f,
     g,
     h,
-    callback_a,
-    callback_b,
-    callback_c,
-    callback_d,
-    callback_e,
-    callback_f,
-    callback_g,
-    callback_h,
 ):
     return InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton(a, callback_data=str(callback_a)),
-                InlineKeyboardButton(b, callback_data=str(callback_b)),
+                InlineKeyboardButton(a[0], callback_data=str(a[1])),
+                InlineKeyboardButton(b[0], callback_data=str(b[1])),
             ],
             [
-                InlineKeyboardButton(c, callback_data=str(callback_c)),
-                InlineKeyboardButton(d, callback_data=str(callback_d)),
+                InlineKeyboardButton(c[0], callback_data=str(c[1])),
+                InlineKeyboardButton(d[0], callback_data=str(d[1])),
             ],
             [
-                InlineKeyboardButton(e, callback_data=str(callback_e)),
-                InlineKeyboardButton(f, callback_data=str(callback_f)),
+                InlineKeyboardButton(e[0], callback_data=str(e[1])),
+                InlineKeyboardButton(f[0], callback_data=str(f[1])),
             ],
             [
-                InlineKeyboardButton(g, callback_data=str(callback_g)),
-                InlineKeyboardButton(h, callback_data=str(callback_h)),
+                InlineKeyboardButton(g[0], callback_data=str(g[1])),
+                InlineKeyboardButton(h[0], callback_data=str(h[1])),
             ],
         ]
     )
