@@ -14,12 +14,15 @@ TG_CHAT_ID = int(environ["TG_CHAT_ID"])
 VK_TOKEN = environ["VK_TOKEN"]
 TG_TOKEN = environ["TG_TOKEN"]
 
-
+# callback constants
 CALLBACK_ANSWER = "answer"
-CALLBACK_CHATS = ""
+CALLBACK_CHATS = "chats"
 
-CHATS_NEXT = "next"
-CHATS_PREV = "prev"
+# strings
+CHATS_NEXT = "NEXT"
+CHATS_PREV = "PREV"
+CHATS_UNREAD = "Unread"
+CHATS_PAGE = "Page"
 
 
 
@@ -36,30 +39,6 @@ class State:
 
     active_conversation_id = None
     active_conversation_name = None
-
-
-# self.message_types = ["user", "group", "chat"]
-
-# self.vk_message = None
-# self.attachments = None
-# self.conversation_name = None
-
-# self.message_text = None
-# self.answer = None
-
-# self.conversation_active = None
-# self.callback_data = None
-# self.reply_markup = None
-
-# # trailing stuff
-# self.trailing = None
-# self.tg_message_id = None
-# self.peer_id_previous = None
-
-# # talking to currently
-# self.active_conversation_id = None
-# self.active_conversation_name = None
-
 
 state = State()
 application = ApplicationBuilder().token(TG_TOKEN).build()  # working on python 3.10+

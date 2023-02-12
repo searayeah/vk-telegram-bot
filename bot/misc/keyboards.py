@@ -4,6 +4,117 @@ from telegram import (
 )
 
 
+def set_keyboard_1(a):
+    return InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton(a[0], callback_data=str(a[1])),
+            ],
+        ]
+    )
+
+
+def set_keyboard_rows_2(a, b):
+    return InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton(a[0], callback_data=str(a[1])),
+            ],
+            [
+                InlineKeyboardButton(b[0], callback_data=str(b[1])),
+            ],
+        ]
+    )
+
+
+def set_keyboard_3(a, b, c):
+    return InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton(a[0], callback_data=str(a[1])),
+                InlineKeyboardButton(b[0], callback_data=str(b[1])),
+            ],
+            [
+                InlineKeyboardButton(c[0], callback_data=str(c[1])),
+            ],
+        ]
+    )
+
+
+def set_keyboard_4(a, b, c, d):
+    return InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton(a[0], callback_data=str(a[1])),
+                InlineKeyboardButton(b[0], callback_data=str(b[1])),
+            ],
+            [
+                InlineKeyboardButton(c[0], callback_data=str(c[1])),
+                InlineKeyboardButton(d[0], callback_data=str(d[1])),
+            ],
+        ]
+    )
+
+
+def set_keyboard_5(a, b, c, d, e):
+    return InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton(a[0], callback_data=str(a[1])),
+                InlineKeyboardButton(b[0], callback_data=str(b[1])),
+            ],
+            [
+                InlineKeyboardButton(c[0], callback_data=str(c[1])),
+                InlineKeyboardButton(d[0], callback_data=str(d[1])),
+            ],
+            [
+                InlineKeyboardButton(e[0], callback_data=str(e[1])),
+            ],
+        ]
+    )
+
+
+def set_keyboard_6(a, b, c, d, e, f):
+    return InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton(a[0], callback_data=str(a[1])),
+                InlineKeyboardButton(b[0], callback_data=str(b[1])),
+            ],
+            [
+                InlineKeyboardButton(c[0], callback_data=str(c[1])),
+                InlineKeyboardButton(d[0], callback_data=str(d[1])),
+            ],
+            [
+                InlineKeyboardButton(e[0], callback_data=str(e[1])),
+                InlineKeyboardButton(f[0], callback_data=str(f[1])),
+            ],
+        ]
+    )
+
+
+def set_keyboard_7(a, b, c, d, e, f, g):
+    return InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton(a[0], callback_data=str(a[1])),
+                InlineKeyboardButton(b[0], callback_data=str(b[1])),
+            ],
+            [
+                InlineKeyboardButton(c[0], callback_data=str(c[1])),
+                InlineKeyboardButton(d[0], callback_data=str(d[1])),
+            ],
+            [
+                InlineKeyboardButton(e[0], callback_data=str(e[1])),
+                InlineKeyboardButton(f[0], callback_data=str(f[1])),
+            ],
+            [
+                InlineKeyboardButton(g[0], callback_data=str(g[1])),
+            ],
+        ]
+    )
+
+
 def set_keyboard_8(
     a,
     b,
@@ -36,127 +147,29 @@ def set_keyboard_8(
     )
 
 
-def set_keyboard_1(x, callback_x):
+def set_keyboard_columns_3(a, b, c):
     return InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton(x, callback_data=str(callback_x)),
-            ],
-        ]
-    )
-
-
-def set_keyboard_row_3(
-    x,
-    y,
-    z,
-    callback_x,
-    callback_y,
-    callback_z,
-):
-    return InlineKeyboardMarkup(
-        [
-            [
-                InlineKeyboardButton(x, callback_data=str(callback_x)),
-                InlineKeyboardButton(y, callback_data=str(callback_y)),
-                InlineKeyboardButton(z, callback_data=str(callback_z)),
+                InlineKeyboardButton(a[0], callback_data=str(a[1])),
+                InlineKeyboardButton(b[0], callback_data=str(b[1])),
+                InlineKeyboardButton(c[0], callback_data=str(c[1])),
             ]
         ]
     )
 
 
-def set_keyboard_column_3(
-    x,
-    y,
-    z,
-    callback_x,
-    callback_y,
-    callback_z,
-):
+def set_keyboard_rows_3(a, b, c):
     return InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton(x, callback_data=str(callback_x)),
+                InlineKeyboardButton(a[0], callback_data=str(a[1])),
             ],
             [
-                InlineKeyboardButton(y, callback_data=str(callback_y)),
+                InlineKeyboardButton(b[0], callback_data=str(b[1])),
             ],
             [
-                InlineKeyboardButton(z, callback_data=str(callback_z)),
-            ],
-        ]
-    )
-
-
-def set_keyboard_triangle_3(
-    x,
-    y,
-    z,
-    callback_x,
-    callback_y,
-    callback_z,
-):
-    return InlineKeyboardMarkup(
-        [
-            [
-                InlineKeyboardButton(x, callback_data=str(callback_x)),
-                InlineKeyboardButton(y, callback_data=str(callback_y)),
-            ],
-            [
-                InlineKeyboardButton(z, callback_data=str(callback_z)),
-            ],
-        ]
-    )
-
-
-def set_keyboard_square_4(
-    x,
-    y,
-    z,
-    t,
-    callback_x,
-    callback_y,
-    callback_z,
-    callback_t,
-):
-    return InlineKeyboardMarkup(
-        [
-            [
-                InlineKeyboardButton(x, callback_data=str(callback_x)),
-                InlineKeyboardButton(y, callback_data=str(callback_y)),
-            ],
-            [
-                InlineKeyboardButton(z, callback_data=str(callback_z)),
-                InlineKeyboardButton(t, callback_data=str(callback_t)),
-            ],
-        ]
-    )
-
-
-def set_keyboard_square_5(
-    x,
-    y,
-    z,
-    t,
-    s,
-    callback_x,
-    callback_y,
-    callback_z,
-    callback_t,
-    callback_s,
-):
-    return InlineKeyboardMarkup(
-        [
-            [
-                InlineKeyboardButton(x, callback_data=str(callback_x)),
-                InlineKeyboardButton(y, callback_data=str(callback_y)),
-            ],
-            [
-                InlineKeyboardButton(z, callback_data=str(callback_z)),
-                InlineKeyboardButton(t, callback_data=str(callback_t)),
-            ],
-            [
-                InlineKeyboardButton(s, callback_data=str(callback_s)),
+                InlineKeyboardButton(c[0], callback_data=str(c[1])),
             ],
         ]
     )

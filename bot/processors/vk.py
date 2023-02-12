@@ -4,9 +4,7 @@ from vkbottle import API, UserPolling
 from vkbottle.user import User
 from vkbottle_types.objects import MessagesConversationPeerType
 from bot import polling
-from bot import CALLBACK_ANSWER
 
-# from bot.processors.messageprocessor import process
 from bot.misc.utils import get_message_type, fix_text, set_tab
 
 
@@ -99,8 +97,9 @@ async def get_chats(count, offset):
                     break
         elif item.conversation.peer.type == MessagesConversationPeerType.CHAT:
             name = item.conversation.chat_settings.title
-        data[item.conversation.peer.id] = fix_text(name)
+        data[item.conversation.peer.id] = name # do not require fix_text as keyboard buttons don't support MarkDown
         if item.conversation.unread_count:
             data[item.conversation.peer.id] += item.conversation.unread_count
     unread_count = chats.unread_count if chats.unread_count else 0
-    return unread_count, data
+    chats_count = chats.count if chats.count else 0
+    return chats_count, unread_count, data
