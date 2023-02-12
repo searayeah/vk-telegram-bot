@@ -14,6 +14,17 @@ TG_CHAT_ID = int(environ["TG_CHAT_ID"])
 VK_TOKEN = environ["VK_TOKEN"]
 TG_TOKEN = environ["TG_TOKEN"]
 
+# callback constants
+CALLBACK_ANSWER = "answer"
+CALLBACK_CHATS = "chats"
+
+# strings
+CHATS_NEXT = "NEXT"
+CHATS_PREV = "PREV"
+CHATS_UNREAD = "Unread"
+CHATS_PAGE = "Page"
+
+
 
 class State:
     parse_mode = "MarkdownV2"
@@ -27,10 +38,6 @@ class State:
 
     active_conversation_id = None
     active_conversation_name = None
-
-
-# self.message_types = ["user", "group", "chat"]
-
 
 state = State()
 application = ApplicationBuilder().token(TG_TOKEN).build()  # working on python 3.10+
