@@ -5,7 +5,6 @@ from vkbottle.user import User
 from vkbottle_types.objects import MessagesConversationPeerType
 from bot import polling
 
-# from bot.processors.messageprocessor import process
 from bot.misc.utils import get_message_type, fix_text, set_tab
 
 
@@ -78,3 +77,29 @@ def send_attach():
 
 def send_vid():
     pass
+
+
+async def get_chats(count, offset):
+    chats = await polling.api.messages.get_conversations(
+        count=count, extended=True, offset=offset
+    )
+    data = {}
+    for item in chats.items:
+        if item.conversation.peer.type == MessagesConversationPeerType.USER:
+            for profile in chats.profiles:
+                if profile.id == item.conversation.peer.id:
+                    name = f"{profile.first_name} {profile.last_name}"
+                    break
+        elif item.conversation.peer.type == MessagesConversationPeerType.GROUP:
+            for group in chats.groups:
+                if group.id == abs(item.conversation.peer.id):
+                    name = group.name
+                    break
+        elif item.conversation.peer.type == MessagesConversationPeerType.CHAT:
+            name = item.conversation.chat_settings.title
+        data[item.conversation.peer.id] = name # do not require fix_text as keyboard buttons don't support MarkDown
+        if item.conversation.unread_count:
+            data[item.conversation.peer.id] += item.conversation.unread_count
+    unread_count = chats.unread_count if chats.unread_count else 0
+    chats_count = chats.count if chats.count else 0
+    return chats_count, unread_count, data
