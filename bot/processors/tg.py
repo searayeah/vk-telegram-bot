@@ -1,4 +1,5 @@
 from bot import application
+from telegram import InputMediaPhoto, InputMediaDocument
 
 
 async def edit_message(text, chat_id, message_id, parse_mode=None, reply_markup=None):
@@ -18,6 +19,28 @@ async def send_message(text, chat_id, parse_mode=None, reply_markup=None):
         parse_mode=parse_mode,
         reply_markup=reply_markup,
     )
+    return message.message_id
+
+
+async def send_photos(chat_id, media, caption, parse_mode=None):
+    media = [InputMediaPhoto(item) for item in media]
+    # media.append(InputMediaDocument("https://github.com/searayeah/searayeah/blob/main/UsefulNotes/MatStat/data_collection.pdf"))
+    message = await application.bot.send_media_group(
+        chat_id=chat_id, media=media, caption=caption, parse_mode=parse_mode
+    )
+    print(message)
+    # return message.message_id
+
+
+async def send_photo(caption, photo, chat_id, parse_mode=None, reply_markup=None):
+    message = await application.bot.send_photo(
+        caption=caption,
+        photo=photo,
+        chat_id=chat_id,
+        parse_mode=parse_mode,
+        reply_markup=reply_markup,
+    )
+    print(message)
     return message.message_id
 
 

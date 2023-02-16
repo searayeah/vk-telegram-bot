@@ -29,7 +29,6 @@ CHATS_PAGE = "Page"
 class State:
     parse_mode = "MarkdownV2"
 
-
     conversation_name = None
 
     trailing = None
