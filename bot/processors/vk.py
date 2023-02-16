@@ -99,7 +99,7 @@ async def get_chats(count, offset):
             name = item.conversation.chat_settings.title
         data[item.conversation.peer.id] = name # do not require fix_text as keyboard buttons don't support MarkDown
         if item.conversation.unread_count:
-            data[item.conversation.peer.id] += item.conversation.unread_count
+            data[item.conversation.peer.id] += f" ({item.conversation.unread_count})"
     unread_count = chats.unread_count if chats.unread_count else 0
     chats_count = chats.count if chats.count else 0
     return chats_count, unread_count, data
