@@ -1,4 +1,4 @@
 python-dotenv==0.21.1
 python_telegram_bot==20.0
 vk_api==11.9.9
-vkbottle==4.3.12
+git+https://github.com/searayeah/vkbottle.git
